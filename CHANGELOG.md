@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
+## [1.1.0] - 2024-05-16
+
+### Changed
+
+- Sync with code from GEOSchem_GridComp `develop` as of 2024-05-16
+
 ## [1.0.0] - 2023-08-25
 
 ### Added
