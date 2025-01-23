@@ -12,7 +12,7 @@ COMP_NAME: GAAS
 # Only change the Registry version when major structural changes
 # occurs, not changes in content
 # --------------------------------------------------------------
-  MAPL_REGISTRY_VERSION: 1.00
+  MAPL_REGISTRY_VERSION: 1.00  
 
 #                               ------------
 #                               Import State
