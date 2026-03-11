@@ -41,7 +41,7 @@ module LDE_Mod
 
       real             :: channel             ! single channel to analyze
 
-      real             :: Delta=-1            ! weight parameter 
+      real             :: Delta=-1            ! weight parameter
 
       integer          :: ks=1                ! top vertical layer
 
@@ -78,11 +78,11 @@ CONTAINS
    subroutine LDE_Create ( self, CF, Grid, rc )
 !
 !    Initialize ensemble parameters, including ensemble size and
-!    ensemble indices (on root PE only). Notice that it is implicitly 
-!    assumed a GEOS-5 lat/lon grid for now. 
+!    ensemble indices (on root PE only). Notice that it is implicitly
+!    assumed a GEOS-5 lat/lon grid for now.
 !
      type(LDE)        , intent(inout)         :: self
-     type(ESMF_Config), intent(inout), target :: CF 
+     type(ESMF_Config), intent(inout), target :: CF
      type(ESMF_Grid),   intent(inout), target :: Grid
      integer, intent(out)                     :: rc
 !                       ---
@@ -106,7 +106,7 @@ CONTAINS
      else
           self%isCubed = .FALSE.
      end if
-  
+
 !    Stencil properties
 !    ------------------
      call ESMF_ConfigGetAttribute(CF, self%R,  Label='stencil_radius_in_km:', __RC__ )
@@ -137,7 +137,7 @@ CONTAINS
      if ( self%isCubed ) then
 
         allocate(self%Indx(self%EM_World), __STAT__ )
-        
+
         if ( MAPL_am_I_root() ) then
              call getEnsIndicesCubed_ ( self%EM_World, self%Indx, __RC__ )
         endif
@@ -150,7 +150,7 @@ CONTAINS
 
         allocate(self%Ie(self%JM_World,self%EM_World), &
                  self%Je(self%JM_World,self%EM_World), __STAT__ )
-        
+
         if ( MAPL_am_I_root() ) then
              call getEnsIndicesLatLon_ ( self%IM_World, self%JM_World, self%EM_World, &
                                          self%R, self%Ie, self%Je, __RC__)
@@ -163,7 +163,7 @@ CONTAINS
 
 !    Land/ocean channels for single channel formulation
 !    --------------------------------------------------
-     call ESMF_ConfigGetAttribute(CF, self%channel, Label='single_channel:',  __RC__) 
+     call ESMF_ConfigGetAttribute(CF, self%channel, Label='single_channel:',  __RC__)
 
 !    Weight parameter (Delta<0 means do not weight ensemble members)
 !    ---------------------------------------------------------------
@@ -191,8 +191,8 @@ CONTAINS
    subroutine LDE_Destroy ( self, rc )
 !
 !    Initialize ensemble parameters, including ensemble size and
-!    ensemble indices (on root PE only). Notice that it is implicitly 
-!    assumed a GEOS-5 lat/lon grid for now. 
+!    ensemble indices (on root PE only). Notice that it is implicitly
+!    assumed a GEOS-5 lat/lon grid for now.
 !
      type(LDE)        , intent(inout)      :: self
      integer, intent(out)                  :: rc
@@ -231,7 +231,7 @@ CONTAINS
 
                             __Iam__('LDE_Generate2d')
 
-   if ( self%isCubed ) then 
+   if ( self%isCubed ) then
         call LDE_Generate2d_Cubed_ ( self, e, a, rc )
    else
         call LDE_Generate2d_LatLon_ ( self, e, a, rc )
@@ -251,14 +251,14 @@ CONTAINS
 !     real(kind=ESMF_KIND_R8), pointer :: x_d(:,:) ! Output: Increments
      real(kind=ESMF_KIND_R4), pointer :: x_d(:,:) ! Output: Increments
      real, pointer         :: x_f(:,:)   ! Input:  Bkg on a single level
-     real, pointer         :: V(:,:,:)   ! Input:  Ensemble of V 
+     real, pointer         :: V(:,:,:)   ! Input:  Ensemble of V
      integer, intent(out)  :: rc
 
 !                             ---
 
                             __Iam__('LDE_Qinc_Global')
 
-   if ( self%isCubed ) then 
+   if ( self%isCubed ) then
 !ALT        call LDE_Qinc_Global_Cubed_ ( self, x_d, x_f,  V, rc )
    else
         call LDE_Qinc_Global_LatLon_ ( self, x_d, x_f,  V, rc )
@@ -271,10 +271,10 @@ CONTAINS
    subroutine LDE_Projector1c ( self, bQ_a, bQ_f, bY_f, bY_d, verbose, rc )
 !
 !    Uses Lagrangian Displacement Ensembles to produce aerosol mixing ratio
-!    analysis given AOD (or log-transformed AOD) background and analysis 
+!    analysis given AOD (or log-transformed AOD) background and analysis
 !    increments, along with the concentrations background.
 !
-!    This is the SINGLE CHANNEL version, with same channel used over land 
+!    This is the SINGLE CHANNEL version, with same channel used over land
 !    and ocean.
 
      type(LDE),               intent(inout) :: self
@@ -289,7 +289,7 @@ CONTAINS
      integer,                 intent(out)   :: rc  ! error code
 
 
-   if ( self%isCubed ) then 
+   if ( self%isCubed ) then
         call LDE_Projector1c_Cubed_ ( self, bQ_a, bQ_f, bY_f, bY_d, verbose, rc )
    else
         call LDE_Projector1c_Latlon_ ( self, bQ_a, bQ_f, bY_f, bY_d, verbose, rc )
@@ -305,43 +305,43 @@ CONTAINS
 
    subroutine getEnsSizeLatLon_ ( im, jm, R, Nx, Ny, rc )
      integer, intent(in) :: im
-     integer, intent(in) :: jm 
+     integer, intent(in) :: jm
      real,    intent(in)  :: R       ! stencil radius
      integer, intent(out) :: Nx      ! stencil size in lon, at the equator
      integer, intent(out) :: Ny      ! stencil size in lat, away from poles
-     integer, intent(out) :: rc 
-     
+     integer, intent(out) :: rc
+
      real*8 :: dx, dy
 
                           __Iam__('getEnsSizeLatLon_')
 
-     rc = 0     
+     rc = 0
      dx = 2. * MAPL_Radius * MAPL_PI / im
      dy = MAPL_Radius * MAPL_PI / ( jm - 1 )
-     Nx = 2 * (nint(R/dx)-1) + 1 
-     Ny = 2 * (nint(R/dy)-1) + 1 
+     Nx = 2 * (nint(R/dx)-1) + 1
+     Ny = 2 * (nint(R/dy)-1) + 1
 
      if ( Nx<3 .OR. Ny<3 ) then
           rc = 1
           return
      end if
-     
+
      if ( Nx*Ny > im*jm ) then
           rc = 2
           return
      end if
-     
+
    end subroutine getEnsSizeLatLon_
 
    subroutine getEnsIndicesLatLon_ ( im, jm, em, R, Ie, Je, rc )
      integer, intent(in)  :: im
-     integer, intent(in)  :: jm 
-     integer, intent(in)  :: em      ! ensemble size 
+     integer, intent(in)  :: jm
+     integer, intent(in)  :: em      ! ensemble size
      real,    intent(in)  :: R       ! stencil radius
 !                                   --- Ensemble Coordinates ----
      integer, intent(out) :: Ie(jm,em) ! symmetric in longitude
      integer, intent(out) :: Je(jm,em) ! symmetric in longitude
-     integer, intent(out) :: rc 
+     integer, intent(out) :: rc
 !                      ----
 
      real*8 :: lat, lon, dLat, dLon ! in radians
@@ -393,21 +393,21 @@ CONTAINS
 
      call zufalli(0) ! initialize random number generator with default seed
 
-     is = 1 ! symmetric in longitude 
+     is = 1 ! symmetric in longitude
      js_: do js = 1, jm
 
 !       Initialize indices for this latitude
 !       ------------------------------------
         iE_ = 0
         jE_ = 0
-        ne  = 0  
+        ne  = 0
 
 !       Coordinates of reference point on unit sphere
 !       ---------------------------------------------
         xs = coslat(js) * coslon(is)
         ys = coslat(js) * sinlon(is)
         zs = sinlat(js)
-        
+
 !       Find those grid points that are close enough
 !       --------------------------------------------
         jj_: do j = js-dJ, js+dJ
@@ -423,14 +423,14 @@ CONTAINS
                  iE_(ne) = i  ! record this longitude index
                  jE_(ne) = j  ! record this latitude  index
               end if
-           end do ii_ 
+           end do ii_
         end do jj_
 
 !       Consistency check, should never happen
 !       --------------------------------------
         if ( ne < em ) then ! recall that we skipped middle point (ZERO perturbation)
            print *, trim(Iam)//': not enough ensemble members: ', &
-                js, ne, em, (em-ne) 
+                js, ne, em, (em-ne)
            STATUS = 3
            VERIFY_(STATUS)
         end if
@@ -440,7 +440,7 @@ CONTAINS
 !       in space. ZERO member will be added to the end
 !       NOTE: Sampling is biased towards polar latitudes
 !       -----------------------------------------------------
-        call zufall ( ne, rn) 
+        call zufall ( ne, rn)
         call IndexSet ( ne, indx )
         call IndexSort ( ne, indx, rn, descend=.false.)
         Ie(js,1:em) = Ie_ ( (/ (indx(i), i=1,em) /) )
@@ -469,13 +469,13 @@ CONTAINS
 
      type(ESMF_Grid), pointer :: Grid
 
-!    Global version of arrays (root PE only) 
+!    Global version of arrays (root PE only)
 !    ---------------------------------------
      integer :: IM_World, JM_World, EM, i, j, n
-     real, pointer :: a_world(:,:)    => null() 
-     real, pointer :: e_world(:,:)    => null() 
-     real, pointer :: ie(:)           => null() 
-     real, pointer :: je(:)           => null() 
+     real, pointer :: a_world(:,:)    => null()
+     real, pointer :: e_world(:,:)    => null()
+     real, pointer :: ie(:)           => null()
+     real, pointer :: je(:)           => null()
 
      Grid => self%Grid
 
@@ -506,7 +506,7 @@ zonal:     do i = 1, IM_World
               where ( ie <        1 ) ie = IM_World + ie
               where ( ie > IM_World ) ie = ie - IM_World
 merid:        do j = 1, JM_World
-                 e_world(i,j) = a_world(ie(j),je(j)) 
+                 e_world(i,j) = a_world(nint(ie(j)),nint(je(j)))
               end do merid
            end do zonal
 !!!           e_world = e_world - a_world ! displacement from central point
@@ -518,7 +518,7 @@ merid:        do j = 1, JM_World
 
 !       Compute displacement from central point
 !       ---------------------------------------
-        e(:,:,n) = e(:,:,n) - a(:,:)  
+        e(:,:,n) = e(:,:,n) - a(:,:)
 
      end do Ens
 
@@ -533,10 +533,10 @@ merid:        do j = 1, JM_World
    subroutine LDE_Projector1c_LatLon_ ( self, bQ_a, bQ_f, bY_f, bY_d, verbose, rc )
 !
 !    Uses Lagrangian Displacement Ensembles to produce aerosol mixing ratio
-!    analysis given AOD (or log-transformed AOD) background and analysis 
+!    analysis given AOD (or log-transformed AOD) background and analysis
 !    increments, along with the concentrations background.
 !
-!    This is the SINGLE CHANNEL version, with same channel used over land 
+!    This is the SINGLE CHANNEL version, with same channel used over land
 !    and ocean.
 !
 !    IMPORTANT: This routine also works for the cubed spehere, albeit not as
@@ -566,8 +566,8 @@ merid:        do j = 1, JM_World
 
      real(kind=ESMF_KIND_R4), pointer :: x_d_World(:,:)
      real(kind=ESMF_KIND_R4), pointer :: x_d_World3d(:,:,:)
-     real, pointer                    :: q_f_World(:,:) 
-     real, pointer                    :: q_f_World3d(:,:,:) 
+     real, pointer                    :: q_f_World(:,:)
+     real, pointer                    :: q_f_World3d(:,:,:)
      real, pointer                    :: V_World(:,:,:)
      real, pointer                    :: a(:,:), a_World(:,:)
      integer, ALLOCATABLE             :: krank(:)
@@ -575,7 +575,7 @@ merid:        do j = 1, JM_World
      integer                          :: nnodes
 
                         __Iam__('LDE_Projector1c')
-                        
+
     if ( present(verbose) ) then
        verbose_ = verbose
     else
@@ -590,7 +590,7 @@ merid:        do j = 1, JM_World
 !   Allocate workspace
 !   ------------------
     allocate ( y_f(im,jm),   &
-               y_d(im,jm),   & 
+               y_d(im,jm),   &
                vnorm(im,jm), &
                X(im,jm,em),  &
                V(im,jm,em),  &
@@ -634,7 +634,7 @@ merid:        do j = 1, JM_World
 
 !    Generate ensembles of AOD backgrounds
 !    -------------------------------------
-     call LDE_Generate2d ( self, V, y_f, __RC__ ) 
+     call LDE_Generate2d ( self, V, y_f, __RC__ )
 
 #ifdef DEBUG
      if ( MAPL_AM_I_Root() .and. verbose_ ) print *
@@ -659,7 +659,7 @@ merid:        do j = 1, JM_World
 #ifdef DEBUG
      call MAPL_MaxMin(' W ',W)
 #endif
-        
+
 !    Normalized AOD ensembles
 !
 !      v{e} = y_f{e} * y_d / <y_f,y_f>
@@ -780,10 +780,10 @@ merid:        do j = 1, JM_World
 
 !       Zero increments above top analysis level
 !       ----------------------------------------
-        do k = 1,self%ks-1 
+        do k = 1,self%ks-1
            bQ_a%r3(s)%q(:,:,k) = bQ_f%r3(s)%q(:,:,k)
         end do
-        
+
 #ifdef DEBUG
         call MAPL_MaxMin('      q_a',bQ_a%r3(s)%q(:,:,self%ks:km))
 #endif
@@ -816,7 +816,7 @@ merid:        do j = 1, JM_World
 !     real(kind=ESMF_KIND_R8), pointer :: x_d(:,:) ! Output: Increments
      real(kind=ESMF_KIND_R4), pointer :: x_d(:,:) ! Output: Increments
      real, pointer         :: x_f(:,:)   ! Input:  Bkg on a single level
-     real, pointer         :: V(:,:,:)   ! Input:  Ensemble of V 
+     real, pointer         :: V(:,:,:)   ! Input:  Ensemble of V
      integer, intent(out)  :: rc
 
 !                             ---
@@ -825,8 +825,8 @@ merid:        do j = 1, JM_World
 
      integer :: IM_World, JM_World, EM, i, j, n
      real, pointer :: X(:,:) => null()  ! LDE based on x_f
-     real, pointer :: ie(:)  => null() 
-     real, pointer :: je(:)  => null() 
+     real, pointer :: ie(:)  => null()
+     real, pointer :: je(:)  => null()
 
 !    Allocate buffers
 !    ----------------
@@ -850,7 +850,7 @@ zonal:  do i = 1, IM_World
            where ( ie <        1 ) ie = IM_World + ie
            where ( ie > IM_World ) ie = ie - IM_World
 merid:     do j = 1, JM_World
-              X(i,j) = x_f(ie(j),je(j)) 
+              X(i,j) = x_f(nint(ie(j)),nint(je(j)))
            end do merid
         end do zonal
 
@@ -871,13 +871,13 @@ merid:     do j = 1, JM_World
 
    subroutine getEnsSizeCubed_ ( im, jm, R, Nx, Ny, rc )
      integer, intent(in) :: im
-     integer, intent(in) :: jm 
+     integer, intent(in) :: jm
      real,    intent(in)  :: R       ! stencil radius
 
      integer, intent(out) :: Nx      ! stencil size in X, always odd
      integer, intent(out) :: Ny      ! same as Nx for cubed-sphere
      integer, intent(out) :: rc
-     
+
 !                                 ---
      real*8 :: dArea, dx
 
@@ -887,7 +887,7 @@ merid:     do j = 1, JM_World
 !  ------------------------------
    dArea = 4. * MAPL_PI * MAPL_RADIUS**2 / ( im * jm ) ! mean area
    dx = sqrt(dArea) ! assumes square "mean" grid-boxes
-     
+
 !  Compute stencil size, making sure it is a odd number for symmetry
 !  -----------------------------------------------------------------
    Nx = 2 * nint(R/dx) + 1
@@ -901,9 +901,9 @@ merid:     do j = 1, JM_World
 
 !............................................................
    subroutine getEnsIndicesCubed_ ( EM_World, Indx, rc )
-     integer, intent(in)  :: EM_World        ! maximum ensemble size 
+     integer, intent(in)  :: EM_World        ! maximum ensemble size
      integer, intent(out) :: Indx(EM_World)  ! Randomized indices
-     integer, intent(out) :: rc 
+     integer, intent(out) :: rc
 !                      ----
 
      real*8  :: rn(EM_World)               ! random numbers
@@ -912,7 +912,7 @@ merid:     do j = 1, JM_World
 
      rc = 0
      call zufalli(0) ! initialize random number generator with default seed
-     call zufall(EM_World,rn) ! sample 
+     call zufall(EM_World,rn) ! sample
      call IndexSet ( EM_World, Indx )
      call IndexSort ( EM_WORLD, Indx, rn, descend=.false.)
 
@@ -922,10 +922,10 @@ merid:     do j = 1, JM_World
 
    subroutine LDE_HaloedFace_ ( im, nH, iFace, hA, A, rc )
 
-     integer, intent(in)  :: im         ! x/y size for a (square) cube face 
+     integer, intent(in)  :: im         ! x/y size for a (square) cube face
      integer, intent(in)  :: nH         ! number of grid-points in halo
-     integer, intent(in)  :: iFace      ! which face of the cube to halo 
-     real,    intent(in)  :: A(im,im,6) ! global array on cobed-sphere 
+     integer, intent(in)  :: iFace      ! which face of the cube to halo
+     real,    intent(in)  :: A(im,im,6) ! global array on cobed-sphere
 
      real, intent(out)    :: hA(-nH+1:im+nH,-nH+1:im+nH)  ! haloed array on face iFace
      integer, intent(out) :: rc
@@ -934,9 +934,9 @@ merid:     do j = 1, JM_World
 !    For face 1 we will have:
 !
 !                    x | 3 | x
-!                  ----|---|---    
-!                    5 | 1 | 2 
-!                  ----|---|---    
+!                  ----|---|---
+!                    5 | 1 | 2
+!                  ----|---|---
 !                    x | 6 | x
 !
 !    where we have indicated the relevant faces. The nearby faces with "x" are the so-called
@@ -967,42 +967,42 @@ merid:     do j = 1, JM_World
 !    Special handle each face
 !    ------------------------
      if ( iFace == 1 ) then
-          call fill_ ( im, 6,   0, 'bottom', hA )  
-          call fill_ ( im, 3, -90, 'top'   , hA )           
-          call fill_ ( im, 5, +90, 'left'  , hA ) 
-          call fill_ ( im, 2,   0, 'right' , hA ) 
+          call fill_ ( im, 6,   0, 'bottom', hA )
+          call fill_ ( im, 3, -90, 'top'   , hA )
+          call fill_ ( im, 5, +90, 'left'  , hA )
+          call fill_ ( im, 2,   0, 'right' , hA )
      else if ( iFace == 2 ) then
-          call fill_ ( im, 6, -90, 'bottom', hA )  
-          call fill_ ( im, 3,   0, 'top'   , hA )           
-          call fill_ ( im, 1,   0, 'left'  , hA ) 
-          call fill_ ( im, 4, +90, 'right' , hA ) 
+          call fill_ ( im, 6, -90, 'bottom', hA )
+          call fill_ ( im, 3,   0, 'top'   , hA )
+          call fill_ ( im, 1,   0, 'left'  , hA )
+          call fill_ ( im, 4, +90, 'right' , hA )
      else if ( iFace == 3 ) then
-          call fill_ ( im, 2,   0, 'bottom', hA )  
-          call fill_ ( im, 5, -90, 'top'   , hA )           
-          call fill_ ( im, 1, +90, 'left'  , hA ) 
-          call fill_ ( im, 4,   0, 'right' , hA ) 
+          call fill_ ( im, 2,   0, 'bottom', hA )
+          call fill_ ( im, 5, -90, 'top'   , hA )
+          call fill_ ( im, 1, +90, 'left'  , hA )
+          call fill_ ( im, 4,   0, 'right' , hA )
      else if ( iFace == 4 ) then
-          call fill_ ( im, 2, -90, 'bottom', hA )  
-          call fill_ ( im, 5,   0, 'top'   , hA )           
-          call fill_ ( im, 3,   0, 'left'  , hA ) 
-          call fill_ ( im, 6, +90, 'right' , hA ) 
+          call fill_ ( im, 2, -90, 'bottom', hA )
+          call fill_ ( im, 5,   0, 'top'   , hA )
+          call fill_ ( im, 3,   0, 'left'  , hA )
+          call fill_ ( im, 6, +90, 'right' , hA )
      else if ( iFace == 5 ) then
-          call fill_ ( im, 4,   0, 'bottom', hA )  
-          call fill_ ( im, 1, -90, 'top'   , hA )           
-          call fill_ ( im, 3, +90, 'left'  , hA ) 
-          call fill_ ( im, 6,   0, 'right' , hA ) 
+          call fill_ ( im, 4,   0, 'bottom', hA )
+          call fill_ ( im, 1, -90, 'top'   , hA )
+          call fill_ ( im, 3, +90, 'left'  , hA )
+          call fill_ ( im, 6,   0, 'right' , hA )
      else if ( iFace == 6 ) then
-          call fill_ ( im, 4, -90, 'bottom', hA )  
-          call fill_ ( im, 1,   0, 'top'   , hA )           
-          call fill_ ( im, 5,   0, 'left'  , hA ) 
-          call fill_ ( im, 2, +90, 'right' , hA ) 
+          call fill_ ( im, 4, -90, 'bottom', hA )
+          call fill_ ( im, 1,   0, 'top'   , hA )
+          call fill_ ( im, 5,   0, 'left'  , hA )
+          call fill_ ( im, 2, +90, 'right' , hA )
      end if
 
      contains
 
-           subroutine fill_ ( im, jFace, iRot, location, hA ) 
+           subroutine fill_ ( im, jFace, iRot, location, hA )
            integer, intent(in) :: im
-           integer, intent(in) :: jFace 
+           integer, intent(in) :: jFace
            integer, intent(in) :: iRot ! whether or not to rotate array
            character(len=*), intent(in) :: location
            real, intent(out)   :: hA(-nH+1:im+nH,-nH+1:im+nH)  ! haloed array on face iFace
@@ -1014,7 +1014,7 @@ merid:     do j = 1, JM_World
            real :: x(im,im)
 
 !          Rotate adjascent face as necessary
-!          ----------------------------------           
+!          ----------------------------------
            if ( iRot==0 ) then
               x = A(:,:,jFace)
            else if ( iRot == +90 ) then ! clockwise
@@ -1033,8 +1033,8 @@ merid:     do j = 1, JM_World
 
 !          Fill in this halo segment
 !          -------------------------
-           if (      location == 'bottom' ) then 
-                                                 hA(1:im,-nh+1:0)    = x(1:im,im-nh+1:im) 
+           if (      location == 'bottom' ) then
+                                                 hA(1:im,-nh+1:0)    = x(1:im,im-nh+1:im)
            else if ( location == 'top' )    then
                                                  hA(1:im,im+1:im+nh) = x(1:im,1:nh)
            else if ( location == 'left' )   then
@@ -1049,9 +1049,9 @@ merid:     do j = 1, JM_World
 
 !........................................................
 
-   subroutine LDE_Qinc_Distrib_Cubed_ ( x_d, a, V, indx, im, jm, em, IM_World, EM_World, nh, self, rc ) 
+   subroutine LDE_Qinc_Distrib_Cubed_ ( x_d, a, V, indx, im, jm, em, IM_World, EM_World, nh, self, rc )
       integer, intent(in)  :: IM_World ! number of x,y gridpoints on face (global)
-      integer, intent(in)  :: EM_World ! maximum ensemble size 
+      integer, intent(in)  :: EM_World ! maximum ensemble size
 
       integer, intent(in)  :: im, jm   ! local dimensions (distributed)
       integer, intent(in)  :: em       ! desired number of ensemble members
@@ -1070,7 +1070,7 @@ merid:     do j = 1, JM_World
       real                 :: X(im,jm,em) ! Analysis increments (distributed)
       integer              :: k
 
-      call LDE_Generate2d_Cubed_Core_ ( X, a, indx, im, jm, em, IM_World, EM_World, nh, self, rc ) 
+      call LDE_Generate2d_Cubed_Core_ ( X, a, indx, im, jm, em, IM_World, EM_World, nh, self, rc )
 
       x_d = 0.0
       do k = 1, em
@@ -1078,10 +1078,10 @@ merid:     do j = 1, JM_World
       end do
    end subroutine LDE_Qinc_Distrib_Cubed_
 
-   subroutine LDE_Generate2d_Cubed_Core_ ( X, a, indx, im, jm, em, IM_World, EM_World, nh, self, rc ) 
+   subroutine LDE_Generate2d_Cubed_Core_ ( X, a, indx, im, jm, em, IM_World, EM_World, nh, self, rc )
 
       integer, intent(in)  :: IM_World ! number of x,y gridpoints on face (global)
-      integer, intent(in)  :: EM_World ! maximum ensemble size 
+      integer, intent(in)  :: EM_World ! maximum ensemble size
 
       integer, intent(in)  :: im, jm   ! local dimensions (distributed)
       integer, intent(in)  :: em       ! desired number of ensemble members
@@ -1110,7 +1110,7 @@ merid:     do j = 1, JM_World
      real  :: V(im,jm,em) ! distributed RHS
      integer :: i1, in, j1, jn
      logical :: inside_domain
-     integer :: status 
+     integer :: status
      character(len=ESMF_MAXSTR) :: Iam = 'LDE_Generate2d_Cubed_Core'
 
      rc = 0
@@ -1121,12 +1121,12 @@ merid:     do j = 1, JM_World
      call ArrayGather ( a, a_world, self%Grid, __RC__ )
      call MAPL_CommsBcast (self%vm, a_world, size(a_world), 0, __RC__)
 
-     X = 0.0 ! Just in case 
+     X = 0.0 ! Just in case
 
 !    Consistency check
 !    -----------------
      if ( EM_World /= (2*nH+1)**2 ) then
-        print *, 'Very strange: Inconsistent nH, EM_World =', nH, EM_World 
+        print *, 'Very strange: Inconsistent nH, EM_World =', nH, EM_World
         rc = 1
         return
      end if
@@ -1137,7 +1137,7 @@ merid:     do j = 1, JM_World
 ! ---------------------
      ! get lower left and upper right corners of my domain
      call MAPL_GRID_INTERIOR(self%Grid,I1,IN,J1,JN)
-     
+
      myFace = (J1-1)/IM_World + 1
      ! Saniny checking: make sure the upper right corner is on the same face
      _ASSERT(myFace == (jn -1)/IM_World+1,'needs informative message')
@@ -1162,7 +1162,7 @@ merid:     do j = 1, JM_World
 
 ! Check if (is,js,iFace) is in domain
               inside_domain = ig >= i1 .and. ig <=in .and.  jg>=j1 .and. jg<=jn
-              if ( .not. inside_domain  ) cycle 
+              if ( .not. inside_domain  ) cycle
 
 !             Look around for ensemble members
 !             --------------------------------
@@ -1173,7 +1173,7 @@ merid:     do j = 1, JM_World
                  ii_: do i = is-nH, is+nH
                     d2 = j2 + (i-is)**2 ! distance squared from (is,js)
                     ne = ne + 1
-                    if ( (i==is .AND. j==js) .OR. (d2>nH2) ) then 
+                    if ( (i==is .AND. j==js) .OR. (d2>nH2) ) then
                          e_(ne) = MAPL_UNDEF ! do not include central point or outside "circle"
                     else
                          e_(ne) = hA(i,j)
@@ -1240,7 +1240,7 @@ merid:     do j = 1, JM_World
      JM_World = self%JM_World
      EM_World = self%EM_World
 
-     call LDE_Generate2d_Cubed_Core_ ( e, a, self%indx, im, jm, em, IM_World, EM_World, nh, self, rc ) 
+     call LDE_Generate2d_Cubed_Core_ ( e, a, self%indx, im, jm, em, IM_World, EM_World, nh, self, rc )
 
 
     end subroutine LDE_Generate2d_Cubed_
@@ -1250,10 +1250,10 @@ merid:     do j = 1, JM_World
    subroutine LDE_Projector1c_Cubed_ ( self, bQ_a, bQ_f, bY_f, bY_d, verbose, rc )
 !
 !    Uses Lagrangian Displacement Ensembles to produce aerosol mixing ratio
-!    analysis given AOD (or log-transformed AOD) background and analysis 
+!    analysis given AOD (or log-transformed AOD) background and analysis
 !    increments, along with the concentrations background.
 !
-!    This is the SINGLE CHANNEL version, with same channel used over land 
+!    This is the SINGLE CHANNEL version, with same channel used over land
 !    and ocean.
 !
 !    IMPORTANT: This routine does not yet work for Lat-Lon; this could be accomplished
@@ -1287,7 +1287,7 @@ merid:     do j = 1, JM_World
 
      real(kind=ESMF_KIND_R4), pointer :: x_d_World(:,:)
      real(kind=ESMF_KIND_R4), pointer :: x_d_World3d(:,:,:)
-     real, pointer                    :: q_f_World(:,:) 
+     real, pointer                    :: q_f_World(:,:)
      real, pointer                    :: V_World(:,:,:)
      real, pointer                    :: a(:,:), a_World(:,:)
      integer, ALLOCATABLE             :: krank(:)
@@ -1296,7 +1296,7 @@ merid:     do j = 1, JM_World
      integer                          :: nH
 
                         __Iam__('LDE_Projector1c')
-                        
+
     if ( present(verbose) ) then
        verbose_ = verbose
     else
@@ -1316,7 +1316,7 @@ merid:     do j = 1, JM_World
 !   Allocate workspace
 !   ------------------
     allocate ( y_f(im,jm),   &
-               y_d(im,jm),   & 
+               y_d(im,jm),   &
                vnorm(im,jm), &
                X(im,jm,em),  &
                V(im,jm,em),  &
@@ -1342,7 +1342,7 @@ merid:     do j = 1, JM_World
 
 !    Generate ensembles of AOD backgrounds
 !    -------------------------------------
-     call LDE_Generate2d ( self, V, y_f, __RC__ ) 
+     call LDE_Generate2d ( self, V, y_f, __RC__ )
 
 #ifdef DEBUG
      if ( MAPL_AM_I_Root() .and. verbose_ ) print *
@@ -1367,7 +1367,7 @@ merid:     do j = 1, JM_World
 #ifdef DEBUG
      call MAPL_MaxMin(' W ',W)
 #endif
-        
+
 !    Normalized AOD ensembles
 !
 !      v{e} = y_f{e} * y_d / <y_f,y_f>
@@ -1421,7 +1421,7 @@ merid:     do j = 1, JM_World
         do k = self%ks, km
            q_f => bQ_f%r3(s)%q(:,:,k)
            x_2d => x_d(:,:,k)
-           call LDE_Qinc_Distrib_Cubed_(x_2d, q_f, V, self%indx, im, jm, em, IM_World, EM_World, nh, self, __RC__ ) 
+           call LDE_Qinc_Distrib_Cubed_(x_2d, q_f, V, self%indx, im, jm, em, IM_World, EM_World, nh, self, __RC__ )
 
 !          Add analysis increments to q
            bQ_a%r3(s)%q(:,:,k) = bQ_f%r3(s)%q(:,:,k) + x_d(:,:,k)
@@ -1430,7 +1430,7 @@ merid:     do j = 1, JM_World
 
 !       Zero increments above top analysis level
 !       ----------------------------------------
-        do k = 1,self%ks-1 
+        do k = 1,self%ks-1
            bQ_a%r3(s)%q(:,:,k) = bQ_f%r3(s)%q(:,:,k)
         end do
 
@@ -1459,7 +1459,7 @@ merid:     do j = 1, JM_World
      character(len=*), intent(in) :: name
 
                        __Iam__('isAerosol_')
-         
+
      if ( ESMF_UtilStringUpperCase(name(1:2))=='DU'       .OR.  &
           ESMF_UtilStringUpperCase(name(1:2))=='SS'       .OR.  &
           ESMF_UtilStringUpperCase(name(1:5))=='NO3AN'    .OR.  &
@@ -1468,7 +1468,7 @@ merid:     do j = 1, JM_World
           ESMF_UtilStringUpperCase(name)     =='BCPHILIC' .OR.  &
           ESMF_UtilStringUpperCase(name)     =='OCPHOBIC' .OR.  &
           ESMF_UtilStringUpperCase(name)     =='OCPHILIC'       ) then
-            
+
           isAerosol_ = .TRUE.
 
      else
