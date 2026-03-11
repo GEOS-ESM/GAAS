@@ -506,7 +506,7 @@ zonal:     do i = 1, IM_World
               where ( ie <        1 ) ie = IM_World + ie
               where ( ie > IM_World ) ie = ie - IM_World
 merid:        do j = 1, JM_World
-                 e_world(i,j) = a_world(nint(ie(j)),nint(je(j)))
+                 e_world(i,j) = a_world(int(ie(j)),int(je(j)))
               end do merid
            end do zonal
 !!!           e_world = e_world - a_world ! displacement from central point
@@ -850,7 +850,7 @@ zonal:  do i = 1, IM_World
            where ( ie <        1 ) ie = IM_World + ie
            where ( ie > IM_World ) ie = ie - IM_World
 merid:     do j = 1, JM_World
-              X(i,j) = x_f(nint(ie(j)),nint(je(j)))
+              X(i,j) = x_f(int(ie(j)),int(je(j)))
            end do merid
         end do zonal
 
