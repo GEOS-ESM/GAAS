@@ -14,6 +14,7 @@ module LDE_Mod
 
    use ESMF
    use MAPL
+   use mapl3g_GridGet, only: grid_get_interior
 
    use Chem_SimpleBundleMod
    use m_Random
@@ -1136,7 +1137,11 @@ merid:     do j = 1, JM_World
 !    Determine myface
 ! ---------------------
      ! get lower left and upper right corners of my domain
-     call MAPL_GRID_INTERIOR(self%Grid,I1,IN,J1,JN)
+     block
+       integer, allocatable :: interior_(:)
+       call grid_get_interior(self%Grid, interior_)
+       I1=interior_(1); IN=interior_(2); J1=interior_(3); JN=interior_(4)
+     end block
      
      myFace = (J1-1)/IM_World + 1
      ! Saniny checking: make sure the upper right corner is on the same face
