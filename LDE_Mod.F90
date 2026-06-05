@@ -363,7 +363,7 @@ CONTAINS
      if ( em > Nx * Ny ) then
         print *, trim(Iam)//': inconsistent em, Nx, Ny', em, Nx, Ny
         STATUS = 1
-        VERIFY_(STATUS)
+        _VERIFY(STATUS)
      end if
 
 !    Trig - Assumes GEOS-5 lat/lon grid
@@ -432,7 +432,7 @@ CONTAINS
            print *, trim(Iam)//': not enough ensemble members: ', &
                 js, ne, em, (em-ne) 
            STATUS = 3
-           VERIFY_(STATUS)
+           _VERIFY(STATUS)
         end if
 
 !       Final shuffle so that we can select fewer members later,
@@ -698,7 +698,7 @@ merid:        do j = 1, JM_World
      enddo
 
      CALL MPI_COMM_SPLIT(COMM, color, mype, lde_comm, STATUS)
-     VERIFY_(STATUS)
+     _VERIFY(STATUS)
 
 !    Allocate V_World on all processes that will participate in the analysis
 !    -----------------------------------------------------------------------

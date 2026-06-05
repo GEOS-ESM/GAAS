@@ -142,7 +142,7 @@ CONTAINS
 !   Wrap internal state for storing in GC; rename legacyState
 !   -------------------------------------
     allocate ( self, stat=STATUS )
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
     wrap%ptr => self
  
 !   Load private Config Attributes
@@ -168,7 +168,7 @@ CONTAINS
 !   Store internal state in GC
 !   --------------------------
     call ESMF_UserCompSetInternalState ( GC, 'GAAS_state', wrap, STATUS )
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
   
 !                         ------------------
 !                         MAPL Data Services
@@ -201,7 +201,7 @@ CONTAINS
 
 !   All done
 !   --------
-    RETURN_(ESMF_SUCCESS)
+    _RETURN(ESMF_SUCCESS)
 
   END SUBROUTINE SetServices
 
@@ -387,7 +387,7 @@ CONTAINS
 
 !  All done
 !  --------
-   RETURN_(ESMF_SUCCESS)
+   _RETURN(ESMF_SUCCESS)
 
    END SUBROUTINE Initialize_
 
@@ -509,7 +509,7 @@ CONTAINS
 !  Stop here if it is NOT analysis time
 !  -------------------------------------
    if ( PREDICTOR_STEP .or. ReplayShutOff .or. (.not. analysis_time) ) then
-      RETURN_(ESMF_SUCCESS)
+      _RETURN(ESMF_SUCCESS)
    end if
 
 !  OK, let's assimilate the AOD analysis
@@ -692,7 +692,7 @@ if (mapl_am_i_root()) print*,'GAAS finished!'
 
 !  All done
 !  --------
-   RETURN_(ESMF_SUCCESS)
+   _RETURN(ESMF_SUCCESS)
 
 Contains
 
@@ -829,7 +829,7 @@ Contains
  
 !  All done
 !  --------
-   RETURN_(ESMF_SUCCESS)
+   _RETURN(ESMF_SUCCESS)
 
  end SUBROUTINE Finalize_
 
@@ -868,7 +868,7 @@ Contains
 !   Get my internal state
 !   ---------------------
     call ESMF_UserCompGetInternalState(gc, 'GAAS_state', WRAP, STATUS)
-    VERIFY_(STATUS)
+    _VERIFY(STATUS)
     self => wrap%ptr
 
 !   Get the configuration
@@ -892,7 +892,7 @@ Contains
 !   ---------------------
     call ESMF_GridCompGet ( GC, grid=GRID, __RC__)
 
-    RETURN_(ESMF_SUCCESS)
+    _RETURN(ESMF_SUCCESS)
 
    end subroutine extract_
 
