@@ -11,7 +11,7 @@ One repository, one gridded component (`GAAS_GridCompMod`), one helper module (`
 
 ## Placement and map
 
-Fixture path: `src/Components/@GEOSgcm_GridComp/GEOSagcm_GridComp/GEOSphysics_GridComp/@GEOSchem_GridComp/@GAAS`. Parent: the Chemistry gridded component, see [`@GEOSchem_GridComp/docs/ARCHITECTURE.md`](../../docs/ARCHITECTURE.md) (section 2.3 lists this repository; section 3 describes how Chemistry adds and runs children). No child repositories.
+Fixture path: `src/Components/@GEOSgcm_GridComp/GEOSagcm_GridComp/GEOSphysics_GridComp/@GEOSchem_GridComp/@GAAS`. Parent: the Chemistry gridded component, see `@GEOSchem_GridComp/docs/ARCHITECTURE.md` (`../../docs/ARCHITECTURE.md` in the fixture) (section 2.3 lists this repository; section 3 describes how Chemistry adds and runs children). No child repositories.
 
 | File | Content |
 |---|---|
