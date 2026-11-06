@@ -22,7 +22,7 @@ component, enabled by `ENABLE_GAAS:` and requiring GOCART-2G.
 
 Fixture path: `src/Components/@GEOSgcm_GridComp/GEOSagcm_GridComp/GEOSphysics_GridComp/@GEOSchem_GridComp/@GAAS`.
 Parent: `@GEOSchem_GridComp/docs/ARCHITECTURE.md` (`../docs/ARCHITECTURE.md` in the fixture)
-and `@GEOSchem_GridComp/AGENTS.md` (`../AGENTS.md` in the fixture) (on this line the parent's documents are not written yet; the MAPL2-line versions are on its `develop` branch).
+and `@GEOSchem_GridComp/AGENTS.md` (`../AGENTS.md` in the fixture).
 
 ## Documents
 | File | Content |
