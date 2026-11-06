@@ -36,5 +36,4 @@ Existing files: `README.md` (title only), `CHANGELOG.md`, `CONTRIBUTING.md`.
 
 ## Build and test
 Built as part of the Chemistry library (`CMakeLists.txt`); also builds the
-`ana_lde.x` program. No unit tests in this repository. Build with the
-GEOSgcm tree (NAG first, then gfortran).
+`ana_lde.x` program. No unit tests in this repository.
