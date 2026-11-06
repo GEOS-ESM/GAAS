@@ -1,7 +1,7 @@
 **Audience:** coding agents and developers working on GAAS.
-**Describes:** the MAPL2 line, branch `develop`.
+**Describes:** the MAPL3 line, branch `release/MAPL-v3`.
 **Verified against:** `GAAS` @ `ea3baf0` (2026-11-06).
-**Placement:** as in the GEOSgcm fixture (`components.yaml` @ `0f2e0fb`).
+**Placement:** as in the GEOSgcm fixture (`components.yaml` @ `f50622d`).
 
 # GAAS decisions
 

@@ -1,17 +1,19 @@
 **Audience:** coding agents and developers working on GAAS (GEOS aerosol analysis system).
-**Describes:** the MAPL2 line, branch `develop`.
+**Describes:** the MAPL3 line, branch `release/MAPL-v3`.
 **Verified against:** `GAAS` @ `ea3baf0` (2026-11-06).
-**Placement:** as in the GEOSgcm fixture (`components.yaml` @ `0f2e0fb`), key `@GAAS`.
+**Placement:** as in the GEOSgcm fixture (`components.yaml` @ `f50622d`), key `@GAAS`.
 Other fixtures (for example GEOSadas, GEOSldas) may place this repository
 elsewhere; paths inside this repository do not change.
 
 # GAAS architecture
 
+**Build status on this line:** not built; not yet ported to MAPL3. `@GEOSchem_GridComp/CMakeLists.txt` on `release/MAPL-v3` has `esma_add_subdirectories(GOCART)` only, with the comment "Restore subdirs as components are ported to MAPL3."; `GAAS` appears only in a commented-out list. The `esma_add_library` block that builds `GEOS_ChemGridComp.F90` (which adds this component) is commented out (`../CMakeLists.txt`); the file itself is present. The code below is the MAPL2 code, identical to the MAPL2 line, kept for a later port. Statements about the parent describe `GEOS_ChemGridComp.F90` as it is on this line; the file is present but not compiled.
+
 One repository, one gridded component (`GAAS_GridCompMod`), one helper module (`LDE_Mod`) and a stand-alone driver. Both documents here are in one file: placement and map first, then the nine component sections.
 
 ## Placement and map
 
-Fixture path: `src/Components/@GEOSgcm_GridComp/GEOSagcm_GridComp/GEOSphysics_GridComp/@GEOSchem_GridComp/@GAAS`. Parent: the Chemistry gridded component, see `@GEOSchem_GridComp/docs/ARCHITECTURE.md` (`../../docs/ARCHITECTURE.md` in the fixture) (section 2.3 lists this repository; section 3 describes how Chemistry adds and runs children). No child repositories.
+Fixture path: `src/Components/@GEOSgcm_GridComp/GEOSagcm_GridComp/GEOSphysics_GridComp/@GEOSchem_GridComp/@GAAS`. Parent: the Chemistry gridded component, see `@GEOSchem_GridComp/docs/ARCHITECTURE.md` (`../../docs/ARCHITECTURE.md` in the fixture) (on this line the parent's documents are not written yet; the MAPL2-line versions are on its `develop` branch). No child repositories.
 
 | File | Content |
 |---|---|
@@ -26,7 +28,7 @@ Fixture path: `src/Components/@GEOSgcm_GridComp/GEOSagcm_GridComp/GEOSphysics_Gr
 | `lde.rc` | resources for the `ana_lde` program (`ExpId`, grid size, file names, LDE keys) |
 | `docs/` | this documentation |
 
-Build (`CMakeLists.txt`): library from `LDE_Mod.F90` and `GAAS_GridCompMod.F90` (`m_ana.F90` is commented out), depending on `MAPL Chem_Base Chem_Shared GMAO_mpeu FVdycoreCubed_GridComp NetCDF::NetCDF_Fortran`; `esma_generate_gocart_code` generates the `GAAS_*___.h` include files from `GAAS_Registry.rc`; all `*.rc` and `*.yaml` (including `AMIP/`) are installed under `etc/`; `ana_lde.x` is built and `ana_lde.py` installed to `bin`.
+Build (`CMakeLists.txt`): library from `LDE_Mod.F90` and `GAAS_GridCompMod.F90` (`m_ana.F90` is commented out), depending on `MAPL Chem_Base Chem_Shared GMAO_mpeu FVdycoreCubed_GridComp NetCDF::NetCDF_Fortran`; `Chem_Base` and `Chem_Shared` come from the Chemistry `Shared` directory, which is not built on this line (`../CMakeLists.txt`, comment on `Shared`); `esma_generate_gocart_code` generates the `GAAS_*___.h` include files from `GAAS_Registry.rc`; all `*.rc` and `*.yaml` (including `AMIP/`) are installed under `etc/`; `ana_lde.x` is built and `ana_lde.py` installed to `bin`.
 
 ## 1. Purpose
 
@@ -35,7 +37,7 @@ GAAS assimilates an off-line aerosol optical depth (AOD) analysis into the onlin
 ## 2. Place in the hierarchy
 
 - Parent: Chemistry. Added with `MAPL_AddChild(GC, NAME='GAAS', SS=GAAS_SetServices)` when `ENABLE_GAAS:` is true (default false) (`GEOS_ChemGridComp.F90`, `SetServices`).
-- Requires GOCART-2G: `SetServices` asserts `enable_GOCART2G` when GAAS is on, and the connection code raises an error again if it is off (`GEOS_ChemGridComp.F90`, `SetServices`). See parent section 3.
+- Requires GOCART-2G: `SetServices` asserts `enable_GOCART2G` when GAAS is on, and the connection code raises an error again if it is off (`GEOS_ChemGridComp.F90`, `SetServices`).
 - Children: none (`GAAS_GridCompMod.F90`, no `MAPL_AddChild`).
 - Parent connections (`GEOS_ChemGridComp.F90`, `SetServices`): `AIRDENS` and `DELP` from `CHEMENV`; `AERO` from `GOCART2G`. `RH2` and `PLE` are not connected in Chemistry (grep of `GEOS_ChemGridComp.F90`); *Unverified:* they come from outside Chemistry as unconnected imports of the parent.
 
@@ -59,13 +61,13 @@ One phase each; no multi-phase registration (`GAAS_GridCompMod.F90`, `SetService
 
 - Imports, from `GAAS_Registry.rc`: `DELP`, `RH2`, `PLE` (3-D); `aod_a`, `aod_f`, `aod_k` (2-D, flagged `norestart`); plus `AERO` added in `SetServices`. Exports: `AODANA`, `AODINC` (2-D); `{DU,SS,NI,SU,BC,OC,BR}ANA` and `{...}INC` (3-D, kg/kg).
 - Off-line AOD inputs `aod_a` (analysis), `aod_f` (background), `aod_k` (averaging kernel) come from ExtData, 3-hourly files `das.aod_{a,f,k}.sfc.*.nc4`, offset `PT450S`, `fail_on_missing_file: false` (`GAAS_GridComp_ExtData.yaml`).
-- Key coupling: `AERO` is the GOCART-2G aerosol state; GAAS drives it through attributes and `ESMF_MethodExecute` labels `serialize_bundle`, `get_monochromatic_aop`, `get_mixRatioSum`, as described in the parent's section on aerosol optics. `q_a` and `q_f` are created from the same serialized bundle, so *Inferred:* the LDE update changes the provider's aerosol mixing ratios in place (the `LDE_Projector1c` comment says `bQ_a` "may share storage with `bQ_f`").
+- Key coupling: `AERO` is the GOCART-2G aerosol state; GAAS drives it through attributes and `ESMF_MethodExecute` labels `serialize_bundle`, `get_monochromatic_aop`, `get_mixRatioSum`; see the parent's documents on the aerosol interface. `q_a` and `q_f` are created from the same serialized bundle, so *Inferred:* the LDE update changes the provider's aerosol mixing ratios in place (the `LDE_Projector1c` comment says `bQ_a` "may share storage with `bQ_f`").
 - Exports are not consumed by other Chemistry code (grep of `GEOS_ChemGridComp.F90` for `AODANA`, `DUANA`, `AODINC` finds nothing); *Inferred:* they are for HISTORY output.
 - Internal state: none (`GAAS_GridCompMod.F90`, `SetServices`, "INTERNAL STATE: (none for now)"). Restarts: none; `AERO` is `MAPL_RestartSkip`. The private `GAAS_State` holds config, Mie tables, registries, the `LDE` object, and the simple bundles.
 
 ## 5. Configuration that changes structure
 
-- `ENABLE_GAAS:` in the Chemistry config (parent, section 3).
+- `ENABLE_GAAS:` in the Chemistry config (parent: `GEOS_ChemGridComp.F90`, `SetServices`).
 - `GAAS_GridComp.rc`: `single_channel:`, `eps_for_log_transform_aod:`, `verbose:`; `top_vertical_layer`, `number_of_ensemble_members`, `stencil_radius_in_km`, `aod_weight_delta` (LDE, read in `LDE_Create`); `NUM_BANDS`, `BANDS` and the `*_OPTICS` file names (Mie).
 - Extra: `AMIP/GAAS_GridComp_ExtData.rc` replaces the input file templates; which one is used is chosen by the experiment setup, not by this repository.
 

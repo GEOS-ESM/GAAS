@@ -1,9 +1,18 @@
 # GAAS (GEOS aerosol analysis system)
 
 **Audience:** coding agents and developers working on GAAS.
-**Describes:** the MAPL2 line, branch `develop`.
+**Describes:** the MAPL3 line, branch `release/MAPL-v3`.
 **Verified against:** `GAAS` @ `ea3baf0` (2026-11-06).
-**Placement:** as in the GEOSgcm fixture (`components.yaml` @ `0f2e0fb`), key `@GAAS`.
+**Placement:** as in the GEOSgcm fixture (`components.yaml` @ `f50622d`), key `@GAAS`.
+
+**Build status on this line:** not built; not yet ported to MAPL3. On
+`release/MAPL-v3`, `@GEOSchem_GridComp/CMakeLists.txt` calls
+`esma_add_subdirectories(GOCART)` only, with the comment "Restore subdirs as
+components are ported to MAPL3."; `GAAS` is in a commented-out list of
+subdirectories. The `esma_add_library` block that builds
+`GEOS_ChemGridComp.F90` is commented out (`../CMakeLists.txt`); the file
+itself is present. The code in this repository is the MAPL2 code, identical
+to the MAPL2 line, kept for a later port.
 
 Single gridded component, `GAAS_GridCompMod`: reads off-line AOD (aerosol
 optical depth) analysis fields, adjusts the model AOD, and spreads the
@@ -13,7 +22,7 @@ component, enabled by `ENABLE_GAAS:` and requiring GOCART-2G.
 
 Fixture path: `src/Components/@GEOSgcm_GridComp/GEOSagcm_GridComp/GEOSphysics_GridComp/@GEOSchem_GridComp/@GAAS`.
 Parent: `@GEOSchem_GridComp/docs/ARCHITECTURE.md` (`../docs/ARCHITECTURE.md` in the fixture)
-and `@GEOSchem_GridComp/AGENTS.md` (`../AGENTS.md` in the fixture).
+and `@GEOSchem_GridComp/AGENTS.md` (`../AGENTS.md` in the fixture) (on this line the parent's documents are not written yet; the MAPL2-line versions are on its `develop` branch).
 
 ## Documents
 | File | Content |
@@ -35,5 +44,11 @@ Existing files: `README.md` (title only), `CHANGELOG.md`, `CONTRIBUTING.md`.
   `.github/workflows/changelog-enforcer.yml`).
 
 ## Build and test
-Built as part of the Chemistry library (`CMakeLists.txt`); also builds the
-`ana_lde.x` program. No unit tests in this repository.
+Not built on this line (see "Build status" above). This repository's
+`CMakeLists.txt` defines the library (`LDE_Mod.F90`, `GAAS_GridCompMod.F90`),
+builds the `ana_lde.x` program and installs `ana_lde.py`; it is reached only
+through the parent's `esma_add_subdirectories`, which does not list `GAAS`
+on this line. GAAS depends on `Chem_Base` and `Chem_Shared`
+(`CMakeLists.txt`, `DEPENDENCIES`), which come from the Chemistry `Shared`
+directory; that directory is also not built on this line (`../CMakeLists.txt`,
+comment on `Shared`). No unit tests in this repository.
