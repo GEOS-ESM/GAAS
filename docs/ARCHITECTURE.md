@@ -13,7 +13,7 @@ One repository, one gridded component (`GAAS_GridCompMod`), one helper module (`
 
 ## Placement and map
 
-Fixture path: `src/Components/@GEOSgcm_GridComp/GEOSagcm_GridComp/GEOSphysics_GridComp/@GEOSchem_GridComp/@GAAS`. Parent: the Chemistry gridded component, see `@GEOSchem_GridComp/docs/ARCHITECTURE.md` (`../../docs/ARCHITECTURE.md` in the fixture) (on this line the parent's documents are not written yet; the MAPL2-line versions are on its `develop` branch). No child repositories.
+Fixture path: `src/Components/@GEOSgcm_GridComp/GEOSagcm_GridComp/GEOSphysics_GridComp/@GEOSchem_GridComp/@GAAS`. Parent: the Chemistry gridded component, see `@GEOSchem_GridComp/docs/ARCHITECTURE.md` (`../../docs/ARCHITECTURE.md` in the fixture). No child repositories.
 
 | File | Content |
 |---|---|
